@@ -1,0 +1,110 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Week 8 Assignment by Cayley Lee</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.28/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <script>
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/widgets/Legend"], (
+        Map,
+        MapView,
+        FeatureLayer,
+        Legend
+      ) => {
+        const defaultSym = {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          outline: {
+            // autocasts as new SimpleLineSymbol()
+            color: [128, 128, 128, 0.2],
+            width: "0.5px"
+          }
+        };
+
+        /*****************************************************************
+         * Set a color visual variable on the renderer. Color visual variables
+         * create continuous ramps that map low data values to weak or
+         * neutral colors and high data values to strong/deep colors. Features
+         * with data values in between the min and max data values are assigned
+         * a color proportionally between the min and max colors.
+         *****************************************************************/
+
+        const renderer = {
+          type: "simple", // autocasts as new SimpleRenderer()
+          symbol: defaultSym,
+          label: "California County",
+          visualVariables: [
+            {
+              type: "color",
+              field: "POPULATION",
+                         legendOptions: {
+                title: "2018 Population"
+              },
+              stops: [
+                {
+                  value: 25,
+                  color: "#E2F4F2",
+                  label: "25"
+                },
+                {
+                  value: 40674,
+                  color: "#013F38",
+                  label: "40,674"
+                }
+              ]
+            }
+          ]
+        };
+
+        const povLayer = new FeatureLayer({
+          url:
+            "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/California_block_group_population_counts/FeatureServer",
+          renderer: renderer,
+          title: "California Block Group - 2018 Population Counts",
+          popupTemplate: {
+            // autocasts as new PopupTemplate()
+            title: "{COUNTY}",
+            content: "There were {POPULATION} population counts in {COUNTY} County in 2018.",
+            
+          }
+        });
+
+        const map = new Map({
+          basemap: "streets-navigation-vector",
+          layers: [povLayer]
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [-120, 37.3],
+          zoom: 5
+        });
+
+        view.ui.add(
+          new Legend({
+            view: view
+          }),
+          "bottom-left"
+        );
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
